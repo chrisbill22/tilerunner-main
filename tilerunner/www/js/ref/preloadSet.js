@@ -37,6 +37,25 @@ var preloadSets = [{
 		url:"assets/footer.png"
 	}]
 },{
+	id:"demo64",
+	state:"level",
+	level: 2,
+	tilemaps: [{
+		name:"map",
+		url:"js/levels/level2-64.json"
+	}],
+	spritesheets: [{
+		name:"protoblocks",
+		url:"assets/protoblocks64.png"
+	},{
+		name:"groundTile",
+		url:"assets/batch-necessary64.png"
+	}],
+	images: [{
+		name:"footerBackground",
+		url:"assets/footer.png"
+	}]
+},{
 	id:"level1",
 	state:"level",
 	level: 1,

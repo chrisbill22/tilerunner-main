@@ -16,9 +16,11 @@ function enemy_create(map, tilesetOffset, groundTileOffset) {
 	//add all the enemies from the tiled map
 	map.objects.objectsLayer.forEach(function (object) {
 		if (object.type == "enemyStart") {
-			console.log(object);
-			console.log(groundTileOffset)
+			enemyLog(object);
+			enemyLog(groundTileOffset)
 			var enemy = enemies.create(object.x, object.y - 32, 'groundTile', object.gid-groundTileOffset);
+            enemyLog(object.gid);
+            enemyLog(groundTileOffset);
 			//pull in all of Tiled's custom properties
 			var customProps = object.properties;
 			//set enemy health from tiled
@@ -90,10 +92,11 @@ function enemy_update(character, map, blockedLayer, marker) {
 				if(enemy.data.aiActivated == false){
 					//checks if player is wakeupDisatnace away in all directions except backwards.
 					if(enemy.data.wakeupBottom == false){
-						if ((enemy.body.y - character.body.y) > enemy.data.wakeupDistance && (enemy.body.y - character.body.y) <= enemy.data.wakeupDistance && Math.abs(enemy.body.x - character.body.x) <= enemy.data.wakeupDistance) {
-							enemy.data.aiActivated = true;
+						if ((enemy.body.y - character.body.y) > enemy.data.wakeupDistance && Math.abs(enemy.body.x - character.body.x) <= enemy.data.wakeupDistance) {
+                            enemy.data.aiActivated = true;
 							enemy.body.velocity.y = enemy.data.speed;
 						}
+                    //wakeup check for all directions
 					}else if(Math.abs(enemy.body.y - character.body.y) <= enemy.data.wakeupDistance+32 && Math.abs(enemy.body.x - character.body.x) <= enemy.data.wakeupDistance){
 						enemy.data.aiActivated = true;
 						enemy.body.velocity.y = enemy.data.speed;
@@ -127,7 +130,7 @@ function enemy_update(character, map, blockedLayer, marker) {
 							
 							//top is open and can be passed
 							if(isTopOpen(enemy, map, blockedLayer, marker)){
-								console.log("TOP TILE IS OPEN");
+								enemyLog("TOP TILE IS OPEN");
 								//top tile is free
 								
 								//stop moving left or right and move up
@@ -216,12 +219,12 @@ function enemy_update(character, map, blockedLayer, marker) {
 					if (enemy.data.activeMove == false) {
 						if (deltaEnemyCharacter > 0 && deltaEnemyCharacter != 1) {
 							//move right
-							console.log("move right");
-							enemy.body.velocity.x = enemy.data.speed+50;
+							enemyLog("move right");
+							enemy.body.velocity.x = (enemy.data.speed+50)*-1;
 						} else if (deltaEnemyCharacter < 0 && deltaEnemyCharacter != -1) {
 							//move left
-							console.log("move left");
-							enemy.body.velocity.x = (enemy.data.speed+50)*-1;
+							enemyLog("move left");
+							enemy.body.velocity.x = (enemy.data.speed+50);
 						} else {
 							//stay center
 							enemy.body.velocity.x = 0;
@@ -252,14 +255,14 @@ function enemy_update(character, map, blockedLayer, marker) {
 //SUPPORT FUNCTIONS
 function isLeftOpen(enemy, map, blockedLayer, marker){
 	var leftTile = map.getTileWorldXY(enemy.x - 32, enemy.y, 32, 32, blockedLayer);
-	console.log("leftTile");
+	enemyLog("leftTile");
 	//debug
 	if(enemy.x - 32 > 0){
 		marker.x = map.getTileWorldXY(enemy.x - 32, enemy.y).worldX;
 		marker.y =  map.getTileWorldXY(enemy.x - 32, enemy.y).worldY;
 	}
 	
-	if(leftTile.collideDown == false){
+	if(!leftTile || leftTile.collideDown == false){
 		return true;
 	}else{
 		return false;
@@ -267,14 +270,14 @@ function isLeftOpen(enemy, map, blockedLayer, marker){
 }
 function isLeftTopOpen(enemy, map, blockedLayer, marker){
 	var leftTile = map.getTileWorldXY(enemy.x - 32, enemy.y - 32, 32, 32, blockedLayer);
-	console.log("leftTOPTile");
+	enemyLog("leftTOPTile");
 	//debug
 	if(enemy.x - 32 > 0){
 		marker.x = map.getTileWorldXY(enemy.x - 32, enemy.y - 32).worldX;
 		marker.y =  map.getTileWorldXY(enemy.x - 32, enemy.y - 32).worldY;
 	}
 	
-	if(leftTile.collideDown == false){
+	if(!leftTile || leftTile.collideDown == false){
 		return true;
 	}else{
 		return false;
@@ -282,12 +285,12 @@ function isLeftTopOpen(enemy, map, blockedLayer, marker){
 }
 function isRightOpen(enemy, map, blockedLayer, marker){
 	var rightTile = map.getTileWorldXY(enemy.x + 32, enemy.y, 32, 32, blockedLayer);
-	console.log("rightTile");
+	enemyLog("rightTile");
 	//debug
 	marker.x = map.getTileWorldXY(enemy.x + 32, enemy.y).worldX;
 	marker.y =  map.getTileWorldXY(enemy.x + 32, enemy.y).worldY;
 	
-	if(rightTile.collideDown == false){
+	if(!rightTile || rightTile.collideDown == false){
 		return true;
 	}else{
 		return false;
@@ -295,12 +298,12 @@ function isRightOpen(enemy, map, blockedLayer, marker){
 }
 function isRightTopOpen(enemy, map, blockedLayer, marker){
 	var rightTile = map.getTileWorldXY(enemy.x + 32, enemy.y - 32, 32, 32, blockedLayer);
-	console.log("rightTOPTile");
+	enemyLog("rightTOPTile");
 	//debug
 	marker.x = map.getTileWorldXY(enemy.x + 32, enemy.y -32).worldX;
 	marker.y =  map.getTileWorldXY(enemy.x + 32, enemy.y-32).worldY;
 	
-	if(rightTile.collideDown == false){
+	if(!rightTile || rightTile.collideDown == false){
 		return true;
 	}else{
 		return false;
@@ -312,12 +315,12 @@ function isTopOpen(enemy, map, blockedLayer, marker){
 	var squareY = Math.round(enemy.y / 32) * 32;
 	var topTile = map.getTileWorldXY(squareX, squareY - 32, 32, 32, blockedLayer);
 	//debug
-	console.log("topTile");
+	enemyLog("topTile");
 	marker.x = map.getTileWorldXY(enemy.x + 31, enemy.y -32).worldX;
 	marker.y =  map.getTileWorldXY(enemy.x + 32, enemy.y-32).worldY;
 	
 	//collide false means a sprite can pass through
-	if(topTile.collideDown == false){
+	if(!topTile || topTile.collideDown == false){
 		return true;
 	}else{
 		return false;
@@ -421,8 +424,8 @@ function enemyAttacked(enemy, duration, damage, character){
 		setTimeout(function(){
 			enemy.data.canBeAttacked = true;
 			enemy.data.loopPaused = false;
-			enemy.body.velocity.y = enemy.data.speed*-1;
-		}, duration);
+			enemy.body.velocity.y = enemy.data.speed;
+		}, duration)
 	}
 }
 function enableEnemies(){

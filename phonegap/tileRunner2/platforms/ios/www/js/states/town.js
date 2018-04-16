@@ -82,6 +82,13 @@ var townState = {
 
 		this.game.camera.follow(this.character);;
 
+		this.game.input.onTap.add(function(){
+			console.log("hit");
+			var canvas = $("canvas");
+			var cursorX = game.input.activePointer.x;
+			var cursorY = game.input.activePointer.y;
+			setCharacterMoveTargetXY(this.character, cursorX, cursorY);
+		}, this);
 		
 		//ITEMS
 		//types = shop, portal
@@ -109,7 +116,7 @@ var townState = {
 		});
 		
 		//this.items.selectAllChildren()
-		
+		/*
 		this.items.onChildInputDown.add(function(child){
 			if(thisRef.movingToStore == false && thisRef.exitingStore == false){
 				//thisRef.game.physics.arcade.moveToXY(thisRef.character,child.x,child.y);
@@ -121,20 +128,9 @@ var townState = {
 				}
 				var entranceSprite = thisRef.items.getByName(shopName);
 				
-				/*
-				console.log(shopName);
-				console.log(entranceSprite.x+", "+entranceSprite.y);
-				thisRef.targetX = entranceSprite.x;
-				thisRef.targetY = entranceSprite.y;
-
-				thisRef.movingDelta = thisRef.character.x - thisRef.targetX;
-				console.log(thisRef.movingDelta);
-				//console.log(thisRef.targetX+", "+thisRef.targetY);
-				thisRef.movingToStore = true;
-				*/
 				setCharacterMoveTargetXY(thisRef.character, entranceSprite.x, entranceSprite.y, "shop", {shopName:shopName});
 			}
-		}, this);
+		}, this);*/
 
 		
 		//CHARACTER INTRO
@@ -187,12 +183,6 @@ var townState = {
 		
 		//used to track FPS rate
 		this.game.time.advancedTiming = true;
-		
-		blockbutton = this.game.add.button(240, canvas.height() - 44, 'blockbuttons', resolvePit, this, 0, 0, 0);
-		function resolvePit(){
-			
-		}
-		blockbutton.fixedToCamera = true;
 	},
 	
 	update: function(){
@@ -210,6 +200,7 @@ var townState = {
 		
 		if(characterIsMoving == false){
 			if(this.game.input.pointer1.isDown){
+				console.log("hit");
 				var canvas = $("canvas");
 				var cursorX = game.input.activePointer.x;
 				var cursorY = game.input.activePointer.y;
@@ -256,6 +247,7 @@ var townState = {
 				loadUpState("map");
 			}
 		});
+		
 	},
 	
 	render: function(){
@@ -343,7 +335,7 @@ var characterEndY = 0;
 var moveKey = null;
 var movePassData = {};
 
-function setCharacterMoveTargetX(character, endX, aMoveKey=null, passData){
+function setCharacterMoveTargetX(character, endX, aMoveKey=null, passData={}){
 	if(characterIsMoving == false){
 		characterStartX = character.x;
 		characterEndX = endX;
@@ -354,7 +346,7 @@ function setCharacterMoveTargetX(character, endX, aMoveKey=null, passData){
 		moveKey = aMoveKey;
 	}
 }
-function setCharacterMoveTargetY(character, endY, aMoveKey=null, passData){
+function setCharacterMoveTargetY(character, endY, aMoveKey=null, passData={}){
 	if(characterIsMoving == false){
 		characterStartY = character.y;
 		characterEndY = endY;
@@ -365,7 +357,7 @@ function setCharacterMoveTargetY(character, endY, aMoveKey=null, passData){
 		moveKey = aMoveKey;
 	}
 }
-function setCharacterMoveTargetXY(character, endX, endY, aMoveKey=null, passData){
+function setCharacterMoveTargetXY(character, endX, endY, aMoveKey=null, passData={}){
 	if(characterIsMoving == false){
 		characterStartX = character.x;
 		characterEndX = endX;

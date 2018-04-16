@@ -26,14 +26,43 @@ var levelState = {
 	specailCutsceneID:null,
 	npcs:Array(),
 	
+    enemySpecial1Paused:false,
+    
 	preload: function(){
 	},
 	
 	create: function(){
-		if(currentState == "level1"){
+		
+		var canvas = $("canvas");
+		
+		//load the map from the preload
+		this.map = this.game.add.tilemap('map');
+        if(currentState == "demo64"){
+            this.map.setTileSize(64, 64);
+        }
+        //this.game.stage.backgroundColor = "#4488AA";
+
+		//apply the tileset image which will be parsed out and loaded into the timemap
+        if(currentState == "demo64"){
+            console.log("64 set");
+            groundtile = this.map.addTilesetImage('batch-necessary64', 'groundTile', 64, 64);
+            this.map.addTilesetImage('protoblocks64', 'protoblocks', 64, 64);
+        }else{
+            this.map.addTilesetImage('batch-necessary', 'groundTile');
+            this.map.addTilesetImage('protoblocks', 'protoblocks');
+        }
+        
+        
+        
+        if(currentState == "level1"){
 			//365 tile offset
-			this.tilesetOffset = 1;
-			this.groundTileOffset = 901;
+            for(var i=0; i!=this.map.tilesets.length; i++){
+                if(this.map.tilesets[i].name == "batch-necessary"){
+                    this.groundTileOffset = this.map.tilesets[i].firstgid;
+                }else if(this.map.tilesets[i].name == "protoblocks"){
+                    this.tilesetOffset = this.map.tilesets[i].firstgid;
+                }
+            }
 		}else if(currentState == "demo"){
 			//1264 tile offset
 			this.tilesetOffset=901;
@@ -41,22 +70,20 @@ var levelState = {
 		}else if(currentState == "tutorial"){
 			//tile offset
 			this.tilesetOffset=1801;
-			this.groundTileOffset = 1;
+			this.groundTileOffset = 0;
 		}else if(currentState == "ai"){
 			//1264 tile offset
 			this.tilesetOffset=901;
-			this.groundTileOffset = 1;
+			this.groundTileOffset = 0;
+		}else if(currentState == "demo64"){
+			//1264 tile offset
+			this.tilesetOffset=901;
+			this.groundTileOffset = 0;
 		}
 		console.log("CharacterStarted = "+this.characterStarted);
-		var canvas = $("canvas");
-		
-		//load the map from the preload
-		this.map = this.game.add.tilemap('map');
-
-		//apply the tileset image which will be parsed out and loaded into the timemap
-		this.map.addTilesetImage('batch-necessary', 'groundTile');
-		this.map.addTilesetImage('protoblocks', 'protoblocks');
-		
+        
+        
+	
 		//add all the standard layers we have in our Tiled file.
 		//These must match Tiled layers
 		this.layer = this.map.createLayer('foreground');
@@ -65,7 +92,11 @@ var levelState = {
 		this.layer.resizeWorld();
 
 		//add the character
-		this.character = this.game.add.sprite(32, 32, 'groundTile', 181);
+		this.character = this.game.add.sprite(0, 0, 'groundTile', 181);
+        //this.character = this.game.add.tileSprite(0, 0, 64, 64, 'groundTile', 181+this.groundTileOffset);
+        this.character.width = this.map.tileWidth;
+        this.character.height = this.map.tileHeight;
+        
 		this.character.animations.add('walkUp', [189, 190, 191], 30, true);
 		this.character.animations.add('walkDown', [180, 181, 182], 30, true);
 		this.character.animations.add('walkLeft', [183, 184, 185], 30, true);
@@ -90,7 +121,7 @@ var levelState = {
 		//Tile info debug marker
 		this.marker = this.game.add.graphics();
 		this.marker.lineStyle(2, 0x33ccff, 1);
-		this.marker.drawRect(0, 0, 32, 32);
+		this.marker.drawRect(0, 0, this.map.tileWidth, this.map.tileHeight);
 
 		//mouse input
 		game.input.onTap.add(this.moveSelectedToCursor, this);
@@ -123,7 +154,7 @@ var levelState = {
 		var thisRef = this;
 		this.map.objects.objectsLayer.forEach(function (object) {
 			if (object.type == "item" && objectNames.indexOf(object.name) == -1) {
-				console.log("item");
+				console.log("item, "+object.name);
 				objectNames.push(object.name);
 				var tileID = 541;
 				if(object.gid != undefined){
@@ -132,7 +163,7 @@ var levelState = {
 				thisRef.map.createFromObjects("objectsLayer", object.name, "groundTile", tileID, true, false, thisRef.items, Phaser.Sprite, false);
 			} else if (object.type == "playerStart") {
 				thisRef.character.x = object.x;
-				thisRef.character.y = object.y - 32;
+				thisRef.character.y = object.y - thisRef.map.tileHeight;
 			} else if(object.type == "gameEnd"){
 				thisRef.endingY = object.y+object.height;
 			}
@@ -143,16 +174,35 @@ var levelState = {
 		enemy_create(this.map, this.tilesetOffset, this.groundTileOffset);
 		
 		//big button input
-		var leftButton = this.game.add.button(0, 0, 'protoblocks', function(){this.movePlayer("left");console.log("left")}, this, 1, 1, 1);
+		leftButton = this.game.add.button(0, 0, 'protoblocks', function(){}, this, 2, 2, 2);
+        leftButton.onInputDown.add(function(){
+            leftButtonDown = true;
+        });
+        leftButton.onInputUp.add(function(){
+            leftButtonDown = false;
+        });
+
 		leftButton.width = canvas.width()/2;
 		leftButton.height = canvas.height();
 		leftButton.fixedToCamera = true;
 		
-		var rightButton = this.game.add.button(canvas.width()/2, 0, 'protoblocks', function(){this.movePlayer("right");console.log("right")}, this, 1, 1, 1);
+        leftButtonDown = false;
+        
+		rightButton = this.game.add.button(canvas.width()/2, 0, 'protoblocks', function(){}, this, 2, 2, 2);
+        
+        rightButton.onInputDown.add(function(){
+            rightButtonDown = true;
+        });
+        rightButton.onInputUp.add(function(){
+            rightButtonDown = false;
+        });
 		rightButton.width = canvas.width()/2;
 		rightButton.height = canvas.height();
 		rightButton.fixedToCamera = true;
+        
+        rightButtonDown = false;
 		
+        console.log("render HUD");
 
 		//HUD
 
@@ -162,6 +212,9 @@ var levelState = {
 		this.healthProgress = game.add.group();
 		this.healthProgress.fixedToCamera = true;
 		var health1 = game.add.sprite(24, 32, 'groundTile', 155);
+        if(currentState == "demo64"){
+            health1.scale.setTo(0.5);
+        }
 		this.healthProgress.add(health1);
 		if(this.character.maxHealth > 4){
 			var shieldsToAdd = Math.ceil(this.character.maxHealth/4)-1;
@@ -254,12 +307,16 @@ var levelState = {
 				thisRef.clickToContinueText.alpha = 0;
 				if(thisRef.specailCutsceneID == 2){
 					thisRef.runningCutscene = true;
-					console.log("fancy cutscene!!");
+					//console.log("fancy cutscene!!");
 					thisRef.character.body.velocity.x = 0;
-					thisRef.character.body.velocity.y = -20;
+					thisRef.character.body.velocity.y = 0;
 				}else if(thisRef.specailCutsceneID == 1){
-					//thisRef.npcs[0].body.velocity.y = -200;
-				}
+					//enemy starts moving on it's own so no need for this anymore
+                    console.log("SPECIAL 1");
+                    enemies.children[0].body.velocity.y = -100;
+				}else if(thisRef.specailCutsceneID == 3){
+                    
+                }
 			}
 		}, self);
 		
@@ -267,11 +324,15 @@ var levelState = {
 		game.time.advancedTiming = true;
 		
 		blockbutton = this.game.add.button(240, canvas.height() - 44, 'protoblocks', resolvePit, this, 29, 29, 29);
+        if(currentState == "demo64"){
+            blockbutton.scale.setTo(0.5);
+        }
+        
 		function resolvePit(){
 			console.log("resolve pit");
 			if(this.blockRecharging == false){
 				//get the tile above
-				var topTile = this.map.getTileAbove(0, Math.round(this.character.x/32), Math.round(this.character.y/32));
+				var topTile = this.map.getTileAbove(0, Math.round(this.character.x/this.map.tileWidth), Math.round(this.character.y/this.map.tileHeight));
 				
 				console.log(topTile);
 				if(this.pitIds.includes(topTile.index-this.tilesetOffset)){
@@ -293,7 +354,7 @@ var levelState = {
 		blockbutton.fixedToCamera = true;
 		this.game.camera.flash("0x000000");
 		
-		this.topLayer = this.map.createLayer('top');
+		//this.topLayer = this.map.createLayer('top');
 		
 		//set this so during restart it picks it up
 		this.characterStarted = false;
@@ -329,6 +390,8 @@ var levelState = {
 			this.enemyDebugText.fixedToCamera = true;
 			this.enemyDebugButton.fixedToCamera = true;
 		}
+        
+        
 		
 		
 		/*if(currentState == "level1"){
@@ -345,11 +408,21 @@ var levelState = {
 			this.npcs.push(friend);
 		}*/
 		
-		
+		console.log("end create");
+        console.log(this.character.frame);
 	},
 	
 	update: function(){
-		
+        
+        if(leftButtonDown == true){
+            this.movePlayer("left");
+            console.log("left");
+        }
+        if(rightButtonDown == true){
+            this.movePlayer("right");
+            console.log("right");
+        }
+        
 		if(this.character.y <= this.endingY){
 			loadUpState("map");
 		}
@@ -368,11 +441,11 @@ var levelState = {
 			}
 			if (Math.abs(Math.round(this.character.body.x - this.currentLane.x)) >= Math.abs(this.movingDelta)) {
 				//find the top tile
-				var topTile = this.map.getTileAbove(0, Math.round(this.character.x/32), Math.round(this.character.y/32));
+				var topTile = this.map.getTileAbove(0, Math.round(this.character.x/this.map.tileWidth), Math.round(this.character.y/this.map.tileHeight));
 				//If top tile is a ground tile and not a blocked tile
 				if(topTile.index == this.tilesetOffset){
 					this.character.body.velocity.x = 0;
-					this.character.body.x = Math.round(this.character.body.x / 32) * 32;
+					this.character.body.x = Math.round(this.character.body.x / this.map.tileWidth) * this.map.tileWidth;
 					this.currentLane.x = this.character.body.x;
 					this.movingDelta = 0;
 					this.movingLanes = false;
@@ -415,7 +488,7 @@ var levelState = {
 				levelState.ftux.setTextBounds(-90, -200);
 				//thisRef.ftux.setTextBounds(80)
 				thisRef.ftux.wordWrap = true;
-				thisRef.ftux.wordWrapWidth = (canvas.width()/2)-32;
+				thisRef.ftux.wordWrapWidth = (canvas.width()/2)-thisRef.map.tileWidth;
 				thisRef.game.add.tween(thisRef.ftuxRectangle_left).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
 				thisRef.game.add.tween(thisRef.ftux).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
 			}else if(item.name == "ftux2"){
@@ -439,10 +512,23 @@ var levelState = {
 				thisRef.cutsceneText.alpha = 1;
 				thisRef.clickToContinueText.alpha = 1;
 				if(item.specialID){
+                    console.log("SPECIAL ID = "+item.specialID);
 					thisRef.specailCutsceneID = item.specialID;
 				}
 			}
 		});
+        
+        game.physics.arcade.overlap(enemies.children[0], this.items, function(enemy, item){
+            if(item.specialID == 3){
+                thisRef.camera.shake();
+                enemy.body.velocity.x = 0;
+                enemy.body.velocity.y = 0;
+            }else if(item.specialID == 2 && thisRef.enemySpecial1Paused == false){
+                enemy.body.velocity.x = 0;
+                enemy.body.velocity.y = 0;
+                thisRef.enemySpecial1Paused = true;
+            }
+        });
 		
 		game.physics.arcade.collide(this.character, this.pits, function(character, pit){
 			//character.body.velocity.y = 0;
@@ -460,6 +546,7 @@ var levelState = {
 			
 			thisRef.updateHealthImage(); 
 		});
+        
 	},
 	
 	render: function(){
@@ -483,7 +570,7 @@ var levelState = {
 						this.character.animations.play("walkUpLeft");
 					}
 					this.movingLanes = true;
-					this.movingDelta = -32;
+					this.movingDelta = - this.map.tileWidth;
 
 					if(currentState == "tutorial"){
 						if(this.ftux.text == "Tap the left side of the screen"){
@@ -506,7 +593,7 @@ var levelState = {
 						this.character.animations.play("walkUpRight");
 					}
 					this.movingLanes = true;
-					this.movingDelta = 32;
+					this.movingDelta = this.map.tileWidth;
 
 					if(currentState == "tutorial"){
 						if(this.ftux.text == "Tap the right side of the screen"){
@@ -598,8 +685,8 @@ var levelState = {
 			//set tile
 			this.selectedTile = tempSelectedTile;
 			//move cursor
-			this.marker.x = x * 32;
-			this.marker.y = y * 32;
+			this.marker.x = x * this.map.tileWidth;
+			this.marker.y = y * this.map.tileHeight;
 		}
 	},
 	
@@ -607,9 +694,9 @@ var levelState = {
 		for(var i=0; i!=this.pits.children.length; i++){
 			var item = this.pits.children[i];
 			//console.log(item.x+" >= "+character.x+" ("+(item.x >= character.x)+") && "+item.x+ " < "+(character.x+32)+" ("+(item.x < (character.x+32))+") && "+item.y+" == "+(character.y-32))
-			console.log(item.x+" == "+character.x+" && "+item.y+" == "+(character.y-32));
-			console.log(item.x == character.x && item.y == (character.y-32));
-			if(item.x == character.x && item.y == (character.y-32)){
+			console.log(item.x+" == "+character.x+" && "+item.y+" == "+(character.y-this.map.tileHeight));
+			console.log(item.x == character.x && item.y == (character.y-this.map.tileHeight));
+			if(item.x == character.x && item.y == (character.y-this.map.tileHeight)){
 				console.log(item);
 				return item;
 				break;
@@ -619,6 +706,12 @@ var levelState = {
 	
 	showCutscene: function(){
 		
-	}
+	},
+    
+    zoomOut: function(){
+        game.camera.scale.setTo(0.5);
+        this.layer.height *=2;
+        this.layer.width *=2;
+    }
 	
 };

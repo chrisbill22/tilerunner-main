@@ -1,1 +1,13 @@
-{"name":"com.chrisbill.tilerunner","version":"1.0.0","displayName":"Tile Runner","cordova":{"platforms":["ios"]},"dependencies":{"cordova-ios":"~4.5.4"}}
+{
+  "name": "com.chrisbill.tilerunner",
+  "version": "1.0.0",
+  "displayName": "Tile Runner",
+  "cordova": {
+    "platforms": [
+      "ios"
+    ]
+  },
+  "dependencies": {
+    "cordova-ios": "~4.5.4"
+  }
+}

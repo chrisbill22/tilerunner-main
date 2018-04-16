@@ -1,7 +1,6 @@
 var levelState = {
 	map:null,
 	layer:null,
-	blockedLayer:null,
 	marker:null,
 	selectedTile:null,
 	character:null,
@@ -19,54 +18,85 @@ var levelState = {
 	healthProgress:null,
 	footerBackground:null,
 	endingY:null,
+	tilesetOffset:0,
 	
 	blockRecharging:false,
+	pitIds:Array(423,424,425),
+	runningCutscene:false,
+	specailCutsceneID:null,
+	npcs:Array(),
 	
 	preload: function(){
 	},
 	
 	create: function(){
+		if(currentState == "level1"){
+			//365 tile offset
+			this.tilesetOffset = 1;
+			this.groundTileOffset = 901;
+		}else if(currentState == "demo"){
+			//1264 tile offset
+			this.tilesetOffset=901;
+			this.groundTileOffset = 0;
+		}else if(currentState == "tutorial"){
+			//tile offset
+			this.tilesetOffset=1801;
+			this.groundTileOffset = 0;
+		}else if(currentState == "ai"){
+			//1264 tile offset
+			this.tilesetOffset=901;
+			this.groundTileOffset = 0;
+		}else if(currentState == "demo64"){
+			//1264 tile offset
+			this.tilesetOffset=901;
+			this.groundTileOffset = 0;
+		}
 		console.log("CharacterStarted = "+this.characterStarted);
 		var canvas = $("canvas");
 		
 		//load the map from the preload
-		this.map = this.game.add.tilemap('map');
+		this.map = this.game.add.tilemap('map', null, 64, 64);
+        if(currentState == "demo64"){
+            this.map.setTileSize(64, 64);
+        }
+        this.game.stage.backgroundColor = "#4488AA";
 
 		//apply the tileset image which will be parsed out and loaded into the timemap
-		this.map.addTilesetImage('batch-necessary', 'groundTile');
-		this.map.addTilesetImage('townSet', 'townSet');
-		//Go through and setup collisions for each tile
-		/*collisionIDs.forEach(function(item){
-			map.setCollisionBetween(item,item+1);
-		})*/
-
+        if(currentState == "demo64"){
+            console.log("64 set");
+            groundtile = this.map.addTilesetImage('batch-necessary64', 'groundTile', 64, 64);
+            this.map.addTilesetImage('protoblocks64', 'protoblocks', 64, 64);
+        }else{
+            this.map.addTilesetImage('batch-necessary', 'groundTile');
+            this.map.addTilesetImage('protoblocks', 'protoblocks');
+        }
+	
 		//add all the standard layers we have in our Tiled file.
 		//These must match Tiled layers
 		this.layer = this.map.createLayer('foreground');
-		this.blockedLayer = this.map.createLayer('obstacles');
+		this.map.setCollisionBetween(330+this.tilesetOffset, 500+this.tilesetOffset);
 
-		//Set collision for everything on the blocked layer
-		this.map.setCollisionBetween(1, 2000, true, 'obstacles');
-
-		//this.layer.resizeWorld();
 		this.layer.resizeWorld();
 
 		//add the character
-		this.character = this.game.add.sprite(32, 32, 'groundTile', 181);
-		this.character.animations.add('walkUp', [189, 190, 191], 30, true);
-		this.character.animations.add('walkDown', [180, 181, 182], 30, true);
-		this.character.animations.add('walkLeft', [183, 184, 185], 30, true);
-		this.character.animations.add('walkRight', [186, 187, 188], 30, true);
-
-		this.character.animations.add('walkUpRight', [195, 196, 197], 30, true);
-		this.character.animations.add('walkUpLeft', [198, 199, 200], 30, true);
+		//this.character = this.game.add.sprite(0, 0, 'groundTile', 181+this.groundTileOffset);
+        this.character = this.game.add.tileSprite(0, 0, 64, 64, 'groundTile', 181+this.groundTileOffset);
+        this.character.width = this.map.tileWidth;
+        this.character.height = this.map.tileHeight;
+        
+        console.log(this.character.width);
+		this.character.animations.add('walkUp', [189+this.groundTileOffset, 190+this.groundTileOffset, 191+this.groundTileOffset], 30, true);
+		this.character.animations.add('walkDown', [180+this.groundTileOffset, 181+this.groundTileOffset, 182+this.groundTileOffset], 30, true);
+		this.character.animations.add('walkLeft', [183+this.groundTileOffset, 184+this.groundTileOffset, 185+this.groundTileOffset], 30, true);
+		this.character.animations.add('walkRight', [186+this.groundTileOffset, 187+this.groundTileOffset, 188+this.groundTileOffset], 30, true);
+		this.character.animations.add('walkUpRight', [195+this.groundTileOffset, 196+this.groundTileOffset, 197+this.groundTileOffset], 30, true);
+		this.character.animations.add('walkUpLeft', [198+this.groundTileOffset, 199+this.groundTileOffset, 200+this.groundTileOffset], 30, true);
 
 		this.character.health = 4;
 		this.character.maxHealth = 4;
 		this.character.data.weapon = 0;
 
 		this.character.events.onKilled.add(function(){
-			console.log("ya dead");
 			//restartState();
 			loadUpState("map");
 		});
@@ -74,16 +104,17 @@ var levelState = {
 		this.game.physics.arcade.enable(this.character);
 
 		this.game.camera.follow(this.character);
-		//this.game.camera.targetOffset.y = -64*2;
+		this.game.camera.targetOffset.y = -64*2;
 
 		//Tile info debug marker
 		this.marker = this.game.add.graphics();
-		this.marker.lineStyle(2, 0xffffff, 1);
-		this.marker.drawRect(0, 0, 32, 32);
+		this.marker.lineStyle(2, 0x33ccff, 1);
+		this.marker.drawRect(0, 0, this.map.tileWidth, this.map.tileHeight);
 
 		//mouse input
-		//game.input.onTap.add(this.moveSelectedToCursor, this);
-
+		game.input.onTap.add(this.moveSelectedToCursor, this);
+		
+		//keyboard input
 		var right = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 		right.onDown.add(function () {
 			this.movePlayer("right")
@@ -105,10 +136,8 @@ var levelState = {
 		}, this);
 
 		//create items and pits
-		this.pits = game.add.group();
 		this.items = game.add.group();
 		this.items.enableBody = true;
-		this.pits.enableBody = true;
 		var objectNames = Array();
 		var thisRef = this;
 		this.map.objects.objectsLayer.forEach(function (object) {
@@ -122,22 +151,28 @@ var levelState = {
 				thisRef.map.createFromObjects("objectsLayer", object.name, "groundTile", tileID, true, false, thisRef.items, Phaser.Sprite, false);
 			} else if (object.type == "playerStart") {
 				thisRef.character.x = object.x;
-				thisRef.character.y = object.y - 32;
+				thisRef.character.y = object.y - thisRef.map.tileHeight;
 			} else if(object.type == "gameEnd"){
 				thisRef.endingY = object.y+object.height;
-			} else if(object.type == "pit" && objectNames.indexOf(object.name) == -1){
-				console.log("pit");
-				objectNames.push(object.name);
-				console.log(object.gid);
-				thisRef.map.createFromObjects("objectsLayer", object.name, "groundTile", (object.gid - 1), true, false, thisRef.pits, Phaser.Sprite, false);
 			}
 		});
-		this.pits.setAllChildren("body.moves", false);
-		this.pits.setAllChildren("body.immovable", true);
 		
 		console.log(objectNames);
 
-		enemy_create(this.map);
+		enemy_create(this.map, this.tilesetOffset, this.groundTileOffset);
+		
+		//big button input
+		var leftButton = this.game.add.button(0, 0, 'protoblocks', function(){this.movePlayer("left");console.log("left")}, this, 2, 2, 2);
+		leftButton.width = canvas.width()/2;
+		leftButton.height = canvas.height();
+		leftButton.fixedToCamera = true;
+		
+		var rightButton = this.game.add.button(canvas.width()/2, 0, 'protoblocks', function(){this.movePlayer("right");console.log("right")}, this, 2, 2, 2);
+		rightButton.width = canvas.width()/2;
+		rightButton.height = canvas.height();
+		rightButton.fixedToCamera = true;
+		
+        console.log("render HUD");
 
 		//HUD
 
@@ -147,6 +182,9 @@ var levelState = {
 		this.healthProgress = game.add.group();
 		this.healthProgress.fixedToCamera = true;
 		var health1 = game.add.sprite(24, 32, 'groundTile', 155);
+        if(currentState == "demo64"){
+            health1.scale.setTo(0.5);
+        }
 		this.healthProgress.add(health1);
 		if(this.character.maxHealth > 4){
 			var shieldsToAdd = Math.ceil(this.character.maxHealth/4)-1;
@@ -179,7 +217,7 @@ var levelState = {
 		this.goldText.fixedToCamera = true;
 		
 		//Level 1 stuff
-		if(currentState == "level1"){
+		if(currentState == "tutorial"){
 			this.ftuxRectangle_left = this.game.add.graphics();
 			this.ftuxRectangle_left.lineStyle(4, 0xffffff, 1);
 			this.ftuxRectangle_left.drawRect(2, 2, canvas.width()/2, canvas.height()-4-64);
@@ -200,33 +238,89 @@ var levelState = {
 			this.ftux.fixedToCamera = true;
 		}
 		
+		//cutscene box
+		this.cutscene = this.game.add.graphics();
+		this.cutscene.lineStyle(2, 0xffffff, 1);
+		this.cutscene.beginFill(0x222222);
+		this.cutscene.drawRect(10, 10, canvas.width()-20, 100);
+		
+		this.cutscene.lineStyle(2, 0xffffff, 1);
+		this.cutscene.beginFill(0x222222);
+		this.cutscene.drawRect(15, 15, canvas.width()-30, 90);
+		
+		this.cutscene.fixedToCamera = true;
+		
+		this.cutsceneText = game.add.text(25, 25, 'This is text This is text This is text This is text This is text', {
+			fontSize: '18px',
+			fill: '#FFFFFF'
+		});
+		this.cutsceneText.wordWrap = true;
+		this.cutsceneText.wordWrapWidth = canvas.width()-50;
+		this.cutsceneText.fixedToCamera = true;
+		
+		this.clickToContinueText = game.add.text(25, 125, 'Tap anywhere to continue', {
+			fontSize: '18px',
+			fill: '#333333'
+		});
+		this.clickToContinueText.fixedToCamera = true;
+
+		this.cutscene.alpha = 0;
+		this.cutsceneText.alpha = 0;
+		this.clickToContinueText.alpha = 0;
+		
+		this.game.input.onDown.add(function(){
+			if(this.game.paused == true){
+				console.log("unpausing")
+				thisRef.game.paused = false;
+				thisRef.cutscene.alpha = 0;
+				thisRef.cutsceneText.alpha = 0;
+				thisRef.clickToContinueText.alpha = 0;
+				if(thisRef.specailCutsceneID == 2){
+					thisRef.runningCutscene = true;
+					console.log("fancy cutscene!!");
+					thisRef.character.body.velocity.x = 0;
+					thisRef.character.body.velocity.y = -20;
+				}else if(thisRef.specailCutsceneID == 1){
+					//thisRef.npcs[0].body.velocity.y = -200;
+				}
+			}
+		}, self);
 		
 		//used to track FPS rate
 		game.time.advancedTiming = true;
 		
-		blockbutton = this.game.add.button(240, canvas.height() - 44, 'blockbuttons', resolvePit, this, 0, 0, 0);
+		blockbutton = this.game.add.button(240, canvas.height() - 44, 'protoblocks', resolvePit, this, 29, 29, 29);
+        if(currentState == "demo64"){
+            blockbutton.scale.setTo(0.5);
+        }
+        
 		function resolvePit(){
 			console.log("resolve pit");
 			if(this.blockRecharging == false){
-				var item = this.getTopItem(this.character);
-				if(item && item.alive == true){
-					item.kill();
+				//get the tile above
+				var topTile = this.map.getTileAbove(0, Math.round(this.character.x/this.map.tileWidth), Math.round(this.character.y/this.map.tileHeight));
+				
+				console.log(topTile);
+				if(this.pitIds.includes(topTile.index-this.tilesetOffset)){
+					//there's a pit infront of me remove the block and replace it with the ground tile
+					levelState.map.removeTile(topTile.x,topTile.y);
+					levelState.map.putTile(this.tilesetOffset, topTile.x,topTile.y);
+					//get the player moving again
 					this.movePlayer("up");
-					this.blockRecharging = true;
+					//freeze out the recharge button
 					var thisRef = this;
 					blockbutton.alpha = 0.3;
 					setTimeout(function(){
 						thisRef.blockRecharging = false;
 						blockbutton.alpha = 1;
 					}, 1000);
-				}else{
 				}
 			}
 		}
 		blockbutton.fixedToCamera = true;
 		this.game.camera.flash("0x000000");
 		
-		this.topLayer = this.map.createLayer('top');
+		//this.topLayer = this.map.createLayer('top');
 		
 		//set this so during restart it picks it up
 		this.characterStarted = false;
@@ -247,19 +341,12 @@ var levelState = {
 							loggingDelay = false;
 						},500)
 						enemy.data.aiActivated = true;
+						console.log(enemy.data.speed);
 						enemy.body.velocity.y = enemy.data.speed;
 						this.game.camera.follow(enemy);
 						break;
 					}
 				}
-				
-				/*enemies.forEachAlive(function (enemy) {
-					enemy.data.aiActivated = true;
-					enemy.body.velocity.y = enemy.data.speed;
-					if(enemies.children.length == 1){
-						this.game.camera.follow(enemy);
-					}
-				});*/
 				enableEnemies();
 			}, this, 1, 1, 1);
 			this.enemyDebugText = game.add.text(34, canvas.height()-30, 'Enable', {
@@ -269,59 +356,31 @@ var levelState = {
 			this.enemyDebugText.fixedToCamera = true;
 			this.enemyDebugButton.fixedToCamera = true;
 		}
+        
+        
+		
+		
+		/*if(currentState == "level1"){
+			var friend = this.game.add.sprite(32,32,'groundTile', 181+60);
+			friend.animations.add('walkUp', [189+60, 190+60, 191+60], 30, true);
+			friend.animations.add('walkDown', [180+60, 181+60, 182+60], 30, true);
+			friend.animations.add('walkLeft', [183+60, 184+60, 185+60], 30, true);
+			friend.animations.add('walkRight', [186+60, 187+60, 188+60], 30, true);
+			friend.animations.add('walkUpRight', [195+60, 196+60, 197+60], 30, true);
+			friend.animations.add('walkUpLeft', [198+60, 199+60, 200+60], 30, true);
+			friend.x = 7*32;
+			friend.y = 108*32;
+			this.game.physics.arcade.enable(friend);
+			this.npcs.push(friend);
+		}*/
+		
+		console.log("end create");
 	},
 	
 	update: function(){
-		
+        
 		if(this.character.y <= this.endingY){
 			loadUpState("map");
-			/*this.game.camera.onFadeComplete.add(function(){
-				
-			});
-			this.game.camera.fade();*/
-		}
-		
-		//input TODO
-		if(this.game.input.pointer1.isDown && this.character.alive){
-			var canvas = $("canvas");
-			var cursorX = game.input.activePointer.x;
-			var cursorY = game.input.activePointer.y;
-			if(cursorY < canvas.height() - 64){
-				if(this.characterStarted == true){
-					if(cursorX < game.width/2 && this.movingDelta >= 0){
-						this.movePlayer("left");
-						if(currentState == "level1"){
-							if(this.ftux.text == "Tap the left side of the screen"){
-								this.game.add.tween(this.ftuxRectangle_left).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-								this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-							}else if(this.ftux.text == "Tap either side of the screen"){
-								this.game.add.tween(this.ftuxRectangle_right).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-								this.game.add.tween(this.ftuxRectangle_left).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-								this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-							}
-						}
-					}else if(cursorX >= game.width/2 && this.movingDelta <= 0){
-						this.movePlayer("right");
-						if(currentState == "level1"){
-							if(this.ftux.text == "Tap the right side of the screen"){
-								this.game.add.tween(this.ftuxRectangle_right).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-								this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-							}else if(this.ftux.text == "Tap either side of the screen"){
-								this.game.add.tween(this.ftuxRectangle_right).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-								this.game.add.tween(this.ftuxRectangle_left).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-								this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-							}
-						}
-					}
-				}else{
-					if(currentState == "level1"){
-						this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-					}
-					this.character.body.velocity.y = this.playerVelocity;
-					this.character.animations.play("walkUp");
-					this.charStartingY = this.character.y;
-				}
-			}
 		}
 		
 		 if(this.characterStarted == false && (this.charStartingY-this.character.y) > 8){
@@ -337,11 +396,12 @@ var levelState = {
 				this.character.body.velocity.x = (this.playerVelocity+50)*1;
 			}
 			if (Math.abs(Math.round(this.character.body.x - this.currentLane.x)) >= Math.abs(this.movingDelta)) {
-				var topTile = this.map.getTileWorldXY(Math.round(this.character.x/32)*32, Math.round(this.character.y/32)*32 - 32, 32, 32, this.blockedLayer);
-				
-				if(topTile == undefined){
+				//find the top tile
+				var topTile = this.map.getTileAbove(0, Math.round(this.character.x/this.map.tileWidth), Math.round(this.character.y/this.map.tileHeight));
+				//If top tile is a ground tile and not a blocked tile
+				if(topTile.index == this.tilesetOffset){
 					this.character.body.velocity.x = 0;
-					this.character.body.x = Math.round(this.character.body.x / 32) * 32;
+					this.character.body.x = Math.round(this.character.body.x / this.map.tileWidth) * this.map.tileWidth;
 					this.currentLane.x = this.character.body.x;
 					this.movingDelta = 0;
 					this.movingLanes = false;
@@ -363,10 +423,10 @@ var levelState = {
 			this.character.animations.stop();
 		}
 		
-		enemy_update(this.character, this.map, this.blockedLayer, this.marker);
-		game.physics.arcade.collide(enemies, this.blockedLayer);
+		enemy_update(this.character, this.map, this.layer, this.marker);
+		game.physics.arcade.collide(enemies, this.layer);
 
-		game.physics.arcade.collide(this.character, this.blockedLayer);
+		game.physics.arcade.collide(this.character, this.layer);
 
 		var thisRef = this;
 		game.physics.arcade.overlap(this.character, this.items, function(character, item){
@@ -384,7 +444,7 @@ var levelState = {
 				levelState.ftux.setTextBounds(-90, -200);
 				//thisRef.ftux.setTextBounds(80)
 				thisRef.ftux.wordWrap = true;
-				thisRef.ftux.wordWrapWidth = (canvas.width()/2)-32;
+				thisRef.ftux.wordWrapWidth = (canvas.width()/2)-thisRef.map.tileWidth;
 				thisRef.game.add.tween(thisRef.ftuxRectangle_left).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
 				thisRef.game.add.tween(thisRef.ftux).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
 			}else if(item.name == "ftux2"){
@@ -401,6 +461,15 @@ var levelState = {
 				thisRef.game.add.tween(thisRef.ftuxRectangle_right).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
 				thisRef.game.add.tween(thisRef.ftuxRectangle_left).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
 				thisRef.game.add.tween(thisRef.ftux).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
+			}else if(item.name == "cutscene"){
+				thisRef.game.paused = true;
+				thisRef.cutsceneText.setText(item.text);
+				thisRef.cutscene.alpha = 1;
+				thisRef.cutsceneText.alpha = 1;
+				thisRef.clickToContinueText.alpha = 1;
+				if(item.specialID){
+					thisRef.specailCutsceneID = item.specialID;
+				}
 			}
 		});
 		
@@ -420,6 +489,7 @@ var levelState = {
 			
 			thisRef.updateHealthImage(); 
 		});
+        
 	},
 	
 	render: function(){
@@ -429,39 +499,72 @@ var levelState = {
 	
 	
 	movePlayer:function(direction) {
-		var left = this.character.left;
-		var bottom = this.character.bottom;
-		if (direction == "left") {
-			if (this.movingDelta == 0) {
-				this.currentLane.x = this.character.body.x;
+		if(this.character.alive && this.runningCutscene == false){
+			if(this.characterStarted == true){
+				var left = this.character.left;
+				var bottom = this.character.bottom;
+				if (direction == "left") {
+					if (this.movingDelta == 0) {
+						this.currentLane.x = this.character.body.x;
+					}
+					if (this.character.body.velocity.y == 0) {
+						this.character.animations.play("walkLeft");
+					} else {
+						this.character.animations.play("walkUpLeft");
+					}
+					this.movingLanes = true;
+					this.movingDelta = - this.map.tileWidth;
+
+					if(currentState == "tutorial"){
+						if(this.ftux.text == "Tap the left side of the screen"){
+							this.game.add.tween(this.ftuxRectangle_left).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+							this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+						}else if(this.ftux.text == "Tap either side of the screen"){
+							this.game.add.tween(this.ftuxRectangle_right).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+							this.game.add.tween(this.ftuxRectangle_left).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+							this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+						}
+					}
+				}
+				if (direction == "right") {
+					if (this.movingDelta == 0) {
+						this.currentLane.x = this.character.body.x;
+					}
+					if (this.character.body.velocity.y == 0) {
+						this.character.animations.play("walkRight");
+					} else {
+						this.character.animations.play("walkUpRight");
+					}
+					this.movingLanes = true;
+					this.movingDelta = this.map.tileWidth;
+
+					if(currentState == "tutorial"){
+						if(this.ftux.text == "Tap the right side of the screen"){
+							this.game.add.tween(this.ftuxRectangle_right).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+							this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+						}else if(this.ftux.text == "Tap either side of the screen"){
+							this.game.add.tween(this.ftuxRectangle_right).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+							this.game.add.tween(this.ftuxRectangle_left).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+							this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+						}
+					}
+				}
+				if (direction == "up") {
+					this.character.animations.play("walkUp");
+					this.character.body.velocity.y = this.playerVelocity;
+				}
+				if (direction == "down") {
+					this.character.animations.play("walkDown");
+					this.character.body.velocity.y = this.playerVelocity*-1;
+				}
+			}else{
+				if(currentState == "tutorial"){
+					this.game.add.tween(this.ftux).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+				}
+				this.character.body.velocity.y = this.playerVelocity;
+				this.character.animations.play("walkUp");
+				this.charStartingY = this.character.y;
 			}
-			if (this.character.body.velocity.y == 0) {
-				this.character.animations.play("walkLeft");
-			} else {
-				this.character.animations.play("walkUpLeft");
-			}
-			this.movingLanes = true;
-			this.movingDelta = -32;
-		}
-		if (direction == "right") {
-			if (this.movingDelta == 0) {
-				this.currentLane.x = this.character.body.x;
-			}
-			if (this.character.body.velocity.y == 0) {
-				this.character.animations.play("walkRight");
-			} else {
-				this.character.animations.play("walkUpRight");
-			}
-			this.movingLanes = true;
-			this.movingDelta = 32;
-		}
-		if (direction == "up") {
-			this.character.animations.play("walkUp");
-			this.character.body.velocity.y = this.playerVelocity;
-		}
-		if (direction == "down") {
-			this.character.animations.play("walkDown");
-			this.character.body.velocity.y = this.playerVelocity*-1;
 		}
 	},
 	
@@ -512,7 +615,7 @@ var levelState = {
 		var y = this.layer.getTileY(game.input.activePointer.worldY);
 
 		//get the tile the cursor is over
-		tempSelectedTile = this.map.getTile(x, y, this.blockedLayer);
+		tempSelectedTile = this.map.getTile(x, y, this.layer);
 
 		if(tempSelectedTile){
 			console.log("Tile Data");
@@ -525,8 +628,8 @@ var levelState = {
 			//set tile
 			this.selectedTile = tempSelectedTile;
 			//move cursor
-			this.marker.x = x * 32;
-			this.marker.y = y * 32;
+			this.marker.x = x * this.map.tileWidth;
+			this.marker.y = y * this.map.tileHeight;
 		}
 	},
 	
@@ -534,14 +637,24 @@ var levelState = {
 		for(var i=0; i!=this.pits.children.length; i++){
 			var item = this.pits.children[i];
 			//console.log(item.x+" >= "+character.x+" ("+(item.x >= character.x)+") && "+item.x+ " < "+(character.x+32)+" ("+(item.x < (character.x+32))+") && "+item.y+" == "+(character.y-32))
-			console.log(item.x+" == "+character.x+" && "+item.y+" == "+(character.y-32));
-			console.log(item.x == character.x && item.y == (character.y-32));
-			if(item.x == character.x && item.y == (character.y-32)){
+			console.log(item.x+" == "+character.x+" && "+item.y+" == "+(character.y-this.map.tileHeight));
+			console.log(item.x == character.x && item.y == (character.y-this.map.tileHeight));
+			if(item.x == character.x && item.y == (character.y-this.map.tileHeight)){
 				console.log(item);
 				return item;
 				break;
 			}
 		}
-	}
+	},
+	
+	showCutscene: function(){
+		
+	},
+    
+    zoomOut: function(){
+        game.camera.scale.setTo(0.5);
+        this.layer.height *=2;
+        this.layer.width *=2;
+    }
 	
 };

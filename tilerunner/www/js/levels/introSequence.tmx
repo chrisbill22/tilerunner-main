@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.3" orientation="orthogonal" renderorder="right-down" width="15" height="115" tilewidth="32" tileheight="32" infinite="0" nextobjectid="12">
+<map version="1.0" tiledversion="1.1.4" orientation="orthogonal" renderorder="right-down" width="15" height="115" tilewidth="32" tileheight="32" infinite="0" nextobjectid="13">
  <tileset firstgid="1" name="protoblocks" tilewidth="32" tileheight="32" tilecount="900" columns="30">
   <image source="../../assets/protoblocks.png" width="960" height="960"/>
  </tileset>
@@ -13,8 +13,8 @@
 395,395,395,395,395,396,1,1,1,394,395,395,395,395,395,
 395,395,395,395,396,1,1,1,1,1,394,395,395,395,395,
 335,335,335,336,1,1,1,1,1,1,1,334,335,335,335,
-365,365,365,366,1,1,1,425,1,1,1,364,365,365,365,
-395,395,395,396,1,1,1,425,1,1,1,394,395,395,395,
+365,365,365,366,1,1,1,1,1,1,1,364,365,365,365,
+395,395,395,396,1,1,1,1,1,1,1,394,395,395,395,
 335,335,335,336,1,1,1,1,1,1,1,334,335,335,335,
 335,335,335,335,336,1,1,1,1,1,334,335,335,335,335,
 335,335,335,335,335,336,1,1,1,334,335,335,335,335,335,
@@ -129,7 +129,7 @@
   <object id="1" name="cutscene" type="item" x="224" y="3456" width="32" height="32">
    <properties>
     <property name="person" value="Best Friend"/>
-    <property name="specialID" type="int" value="1"/>
+    <property name="specialID" type="int" value="0"/>
     <property name="text">Tag! You're it!
 Catch me if you can!</property>
    </properties>
@@ -138,36 +138,42 @@ Catch me if you can!</property>
   <object id="3" name="cutscene" type="item" x="192" y="3296" width="96" height="32">
    <properties>
     <property name="person" value="Best Friend"/>
+    <property name="specialID" type="int" value="0"/>
     <property name="text" value="Watch out for those obstacles! Get around them as fast as you can."/>
    </properties>
   </object>
   <object id="4" name="cutscene" type="item" x="96" y="3072" width="96" height="32">
    <properties>
     <property name="person" value="Best Friend"/>
+    <property name="specialID" type="int" value="0"/>
     <property name="text" value="You made it past the first one.. Don't get stuck on the second."/>
    </properties>
   </object>
   <object id="5" name="cutscene" type="item" x="288" y="3072" width="96" height="32">
    <properties>
     <property name="person" value="Best Friend"/>
+    <property name="specialID" type="int" value="0"/>
     <property name="text" value="You made it past the first one.. Don't get stuck on the second."/>
    </properties>
   </object>
   <object id="6" name="cutscene" type="item" x="224" y="1792" width="64" height="32">
    <properties>
     <property name="person" value="Best Friend"/>
+    <property name="specialID" type="int" value="0"/>
     <property name="text" value="We're entering the forest now.. Good luck keeping up!"/>
    </properties>
   </object>
   <object id="7" name="cutscene" type="item" x="224" y="992" width="32" height="32">
    <properties>
     <property name="person" value="Best Friend"/>
+    <property name="specialID" type="int" value="0"/>
     <property name="text" value="Dang the forest got really thick."/>
    </properties>
   </object>
-  <object id="8" name="cutscene" type="item" x="224" y="512" width="32" height="32">
+  <object id="8" name="cutscene" type="item" x="224" y="480" width="32" height="32">
    <properties>
     <property name="person" value="Best Friend"/>
+    <property name="specialID" type="int" value="1"/>
     <property name="text" value="Woah it looks like there's a clearing up here. I haven't seen this before!"/>
    </properties>
   </object>
@@ -178,13 +184,20 @@ Catch me if you can!</property>
     <property name="text" value="What is that.. I've never seen it before.."/>
    </properties>
   </object>
-  <object id="10" name="enemyStart" type="enemyStart" gid="1142" x="224" y="3488" width="32" height="32">
+  <object id="10" name="enemyStart" type="enemyStart" gid="1142" x="224" y="3424" width="32" height="32">
    <properties>
     <property name="attack" type="int" value="0"/>
     <property name="health" type="int" value="100"/>
     <property name="speedAdjust" type="int" value="0"/>
     <property name="wakeupBottom" type="bool" value="true"/>
     <property name="wakeupDistance" type="int" value="48"/>
+   </properties>
+  </object>
+  <object id="12" name="cutscene" type="item" x="224" y="160" width="32" height="32">
+   <properties>
+    <property name="person" value="Best Friend"/>
+    <property name="specialID" type="int" value="3"/>
+    <property name="text" value="Woah!!"/>
    </properties>
   </object>
  </objectgroup>

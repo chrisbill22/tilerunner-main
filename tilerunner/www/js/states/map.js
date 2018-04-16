@@ -32,6 +32,18 @@ var mapState = {
 			fill: '#000'
 		});
 		this.demoBtn.fixedToCamera = true;
+        
+        
+        //Demo1-64
+		this.game.add.button(20, 220, 'level1btn', demo64, this, 1, 1, 1);
+		function demo64(){
+			loadUpState("demo64");
+		}
+		this.demo64Btn = game.add.text(32, 225, 'Demo64', {
+			fontSize: '18px',
+			fill: '#000'
+		});
+		this.demo64Btn.fixedToCamera = true;
 		
 		
 		//Level 1

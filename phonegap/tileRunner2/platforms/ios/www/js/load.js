@@ -28,8 +28,14 @@ var loadState = {
 				}
 				if(item.spritesheets){
 					item.spritesheets.forEach(function(spritesheet){
-						var tileWidth = 32;
-						var tileHeight = 32;
+                        if(currentState == "demo64"){
+                            var tileWidth = 64;
+                            var tileHeight = 64;
+                        }else{
+                            var tileWidth = 32;
+                            var tileHeight = 32;
+                        }
+						
 						if(spritesheet.tileWidth){
 							tileWidth = spritesheet.tileWidth
 						}

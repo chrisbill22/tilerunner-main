@@ -54,6 +54,8 @@
 		game.state.add('level', levelState);
 		game.state.add('town', townState);
 		
+        game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+        
 		window.addEventListener("resize", function () {
 			game.scale.setGameSize(window.innerWidth, window.innerHeight);
 		});
