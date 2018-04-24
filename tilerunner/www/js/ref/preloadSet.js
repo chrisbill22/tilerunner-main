@@ -1,6 +1,6 @@
 var preloadSets = [{
 	id:"tutorial",
-	state:"level",
+	state:"tutorial",
 	level: 1,
 	tilemaps: [{
 		name:"map",
@@ -19,7 +19,7 @@ var preloadSets = [{
 	}]
 },{
 	id:"demo",
-	state:"level",
+	state:"demo",
 	level: 2,
 	tilemaps: [{
 		name:"map",
@@ -57,7 +57,7 @@ var preloadSets = [{
 	}]
 },{
 	id:"level1",
-	state:"level",
+	state:"level1",
 	level: 1,
 	tilemaps: [{
 		name:"map",
@@ -76,7 +76,7 @@ var preloadSets = [{
 	}]
 },{
 	id:"ai",
-	state:"level",
+	state:"aitest",
 	level: 4,
 	tilemaps: [{
 		name:"map",

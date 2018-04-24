@@ -68,7 +68,7 @@ var loadState = {
 function loadUpState(stateID){
 	stateIntent = stateID;
 	startEnemies = false;
-	levelState.characterStarted = false;
+	characterStarted = false;
 	this.game.camera.onFadeComplete.add(function(){
 		game.state.start('load');
 	});

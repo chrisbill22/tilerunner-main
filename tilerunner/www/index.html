@@ -38,11 +38,19 @@
 	<script type="text/javascript" src="js/ref/weapons.js"></script>
 	<script type="text/javascript" src="js/ref/preloadSet.js"></script>
 	
+    <!-- REFERENCE FILES -->
 	<script type="text/javascript" src="js/ref/enemy.js"></script>
-	
-	<script type="text/javascript" src="js/states/level.js"></script>
+	<script type="text/javascript" src="js/ref/player.js"></script>
+    <script type="text/javascript" src="js/ref/runnerLevel.js"></script>
+    <script type="text/javascript" src="js/ref/hud.js"></script>
+    
+    <!-- STATE FILES -->
+	<script type="text/javascript" src="js/states/level1.js"></script>
+    <script type="text/javascript" src="js/states/demo.js"></script>
+    <script type="text/javascript" src="js/states/tutorial.js"></script>
 	<script type="text/javascript" src="js/states/map.js"></script>
 	<script type="text/javascript" src="js/states/town.js"></script>
+    <script type="text/javascript" src="js/states/aitest.js"></script>
 	
 	<!-- GAME STARTUP -->
 	<script type="text/javascript">
@@ -51,7 +59,12 @@
 		game.state.add('boot', bootState, true);
 		game.state.add('load', loadState);
 		game.state.add('map', mapState);
-		game.state.add('level', levelState);
+        //levels
+		game.state.add('demo', demo);
+        game.state.add('level1', level1);
+        game.state.add('tutorial', tutorial);
+        game.state.add('aitest', aitest);
+        //towns
 		game.state.add('town', townState);
 		
         //game.scale.scaleMode = Phaser.ScaleManager.RESIZE;

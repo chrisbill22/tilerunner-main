@@ -11,7 +11,7 @@ function enemyLog(text){
 //----------------
 // CREATE
 //----------------
-function enemy_create(map, tilesetOffset, groundTileOffset) {
+function enemy_create() {
 	enemies = game.add.group();
 	//add all the enemies from the tiled map
 	map.objects.objectsLayer.forEach(function (object) {
@@ -76,12 +76,41 @@ function enemy_create(map, tilesetOffset, groundTileOffset) {
 		attackPower: 25,
 		loopPaused: false
 	});*/
+    
+    //enemy debugging
+    var loggingDelay = false;
+    if(enemyLogging && !loggingDelay){
+        var canvas = $("canvas");
+        this.enemyDebugButton = this.game.add.button(20, canvas.height()-35, 'level1btn', function(){
+            for(var i=0; i != enemies.length; i++){
+                var enemy = enemies.children[i];
+                if(enemy.data.aiActivated != true && loggingDelay == false){
+                    loggingDelay = true;
+                    setTimeout(function(){
+                        loggingDelay = false;
+                    },500)
+                    enemy.data.aiActivated = true;
+                    console.log(enemy.data.speed);
+                    enemy.body.velocity.y = enemy.data.speed;
+                    this.game.camera.follow(enemy);
+                    break;
+                }
+            }
+            enableEnemies();
+        }, this, 1, 1, 1);
+        this.enemyDebugText = game.add.text(34, canvas.height()-30, 'Enable', {
+            fontSize: '18px',
+            fill: '#000'
+        });
+        this.enemyDebugText.fixedToCamera = true;
+        this.enemyDebugButton.fixedToCamera = true;
+    }
 }
 
 //----------------
 // UPDATE
 //----------------
-function enemy_update(character, map, blockedLayer, marker) {
+function enemy_update(marker) {
 	if(startEnemies){
 		//Loop through each enemy that is alive
 		enemies.forEachAlive(function (enemy) {
@@ -124,12 +153,12 @@ function enemy_update(character, map, blockedLayer, marker) {
 							var squareY = Math.round(enemy.y / 32) * 32;
 							
 							
-							//var topTile = map.getTileWorldXY(squareX, squareY-32, 32, 32, blockedLayer);
+							//var topTile = map.getTileWorldXY(squareX, squareY-32, 32, 32, layer);
 							//marker.x = squareX;
 							//marker.y = squareY-32;
 							
 							//top is open and can be passed
-							if(isTopOpen(enemy, map, blockedLayer, marker)){
+							if(isTopOpen(enemy, map, layer, marker)){
 								enemyLog("TOP TILE IS OPEN");
 								//top tile is free
 								
@@ -146,7 +175,7 @@ function enemy_update(character, map, blockedLayer, marker) {
 							if(enemy.data.lastVelocity.y == 0 && enemy.data.lastVelocity.x == 0){
 								//oops we're stuck
 								enemyLog("oops we're stuck. Try ublocking again");
-								unblockEnemy(enemy, character, map, blockedLayer, marker);
+								unblockEnemy(enemy, character, map, layer, marker);
 							}
 						}
 					}
@@ -170,7 +199,7 @@ function enemy_update(character, map, blockedLayer, marker) {
 								if(enemy.body.velocity.y == 0){
 									//can't move up and can't move right
 									enemyLog("and is no longer moving up");
-									unblockEnemy(enemy, character, map, blockedLayer, marker);
+									unblockEnemy(enemy, character, map, layer, marker);
 								}
 							}else if(enemy.data.lastVelocity.x < 0){
 								//was moving left
@@ -178,7 +207,7 @@ function enemy_update(character, map, blockedLayer, marker) {
 								if(enemy.body.velocity.y == 0){
 									//can't move up and can't move right
 									enemyLog("and is no longer moving up");
-									unblockEnemy(enemy, character, map, blockedLayer, marker);
+									unblockEnemy(enemy, character, map, layer, marker);
 								}
 							}else{
 								//was not moving and now is
@@ -192,9 +221,9 @@ function enemy_update(character, map, blockedLayer, marker) {
 								//was moving up
 								//something must be in front of me. Check to make sure
 								enemyLog("was moving up");
-								if(!isTopOpen(enemy, map, blockedLayer, marker)){
+								if(!isTopOpen(enemy, map, layer, marker)){
 									enemyLog("something is above me");
-									unblockEnemy(enemy, character, map, blockedLayer, marker);
+									unblockEnemy(enemy, character, map, layer, marker);
 								}else{
 									enemyLog("nothing is above me. Restore normal behavior.");
 									enemy.data.activeMove = true;
@@ -244,6 +273,8 @@ function enemy_update(character, map, blockedLayer, marker) {
 			}
 		});
 	}
+    
+    game.physics.arcade.collide(enemies, layer);
 	
 	//Don't allow 2 enemies on the same tile
 	//collision physics
@@ -253,13 +284,15 @@ function enemy_update(character, map, blockedLayer, marker) {
 
 
 //SUPPORT FUNCTIONS
-function isLeftOpen(enemy, map, blockedLayer, marker){
-	var leftTile = map.getTileWorldXY(enemy.x - 32, enemy.y, 32, 32, blockedLayer);
+function isLeftOpen(enemy, map, layer, marker){
+	var leftTile = map.getTileWorldXY(enemy.x - 32, enemy.y, 32, 32, layer);
 	enemyLog("leftTile");
 	//debug
 	if(enemy.x - 32 > 0){
-		marker.x = map.getTileWorldXY(enemy.x - 32, enemy.y).worldX;
-		marker.y =  map.getTileWorldXY(enemy.x - 32, enemy.y).worldY;
+        if(enemyLogging){
+		  marker.x = map.getTileWorldXY(enemy.x - 32, enemy.y).worldX;
+		  marker.y =  map.getTileWorldXY(enemy.x - 32, enemy.y).worldY;
+        }
 	}
 	
 	if(!leftTile || leftTile.collideDown == false){
@@ -268,13 +301,15 @@ function isLeftOpen(enemy, map, blockedLayer, marker){
 		return false;
 	}
 }
-function isLeftTopOpen(enemy, map, blockedLayer, marker){
-	var leftTile = map.getTileWorldXY(enemy.x - 32, enemy.y - 32, 32, 32, blockedLayer);
+function isLeftTopOpen(enemy, map, layer, marker){
+	var leftTile = map.getTileWorldXY(enemy.x - 32, enemy.y - 32, 32, 32, layer);
 	enemyLog("leftTOPTile");
 	//debug
 	if(enemy.x - 32 > 0){
-		marker.x = map.getTileWorldXY(enemy.x - 32, enemy.y - 32).worldX;
-		marker.y =  map.getTileWorldXY(enemy.x - 32, enemy.y - 32).worldY;
+        if(enemyLogging){
+		  marker.x = map.getTileWorldXY(enemy.x - 32, enemy.y - 32).worldX;
+		  marker.y =  map.getTileWorldXY(enemy.x - 32, enemy.y - 32).worldY;
+        }
 	}
 	
 	if(!leftTile || leftTile.collideDown == false){
@@ -283,12 +318,14 @@ function isLeftTopOpen(enemy, map, blockedLayer, marker){
 		return false;
 	}
 }
-function isRightOpen(enemy, map, blockedLayer, marker){
-	var rightTile = map.getTileWorldXY(enemy.x + 32, enemy.y, 32, 32, blockedLayer);
+function isRightOpen(enemy, map, layer, marker){
+	var rightTile = map.getTileWorldXY(enemy.x + 32, enemy.y, 32, 32, layer);
 	enemyLog("rightTile");
 	//debug
-	marker.x = map.getTileWorldXY(enemy.x + 32, enemy.y).worldX;
-	marker.y =  map.getTileWorldXY(enemy.x + 32, enemy.y).worldY;
+    if(enemyLogging){
+	   marker.x = map.getTileWorldXY(enemy.x + 32, enemy.y).worldX;
+	   marker.y =  map.getTileWorldXY(enemy.x + 32, enemy.y).worldY;
+    }
 	
 	if(!rightTile || rightTile.collideDown == false){
 		return true;
@@ -296,29 +333,33 @@ function isRightOpen(enemy, map, blockedLayer, marker){
 		return false;
 	}
 }
-function isRightTopOpen(enemy, map, blockedLayer, marker){
-	var rightTile = map.getTileWorldXY(enemy.x + 32, enemy.y - 32, 32, 32, blockedLayer);
+function isRightTopOpen(enemy, map, layer, marker){
+	var rightTile = map.getTileWorldXY(enemy.x + 32, enemy.y - 32, 32, 32, layer);
 	enemyLog("rightTOPTile");
 	//debug
-	marker.x = map.getTileWorldXY(enemy.x + 32, enemy.y -32).worldX;
-	marker.y =  map.getTileWorldXY(enemy.x + 32, enemy.y-32).worldY;
-	
+    if(enemyLogging){
+	   marker.x = map.getTileWorldXY(enemy.x + 32, enemy.y -32).worldX;
+	   marker.y =  map.getTileWorldXY(enemy.x + 32, enemy.y-32).worldY;
+    }
+    
 	if(!rightTile || rightTile.collideDown == false){
 		return true;
 	}else{
 		return false;
 	}
 }
-function isTopOpen(enemy, map, blockedLayer, marker){
+function isTopOpen(enemy, map, layer, marker){
 	//using +31 right now but there's probabaly a more complicated ceil function to write
 	var squareX = Math.round(enemy.x / 32) * 32;
 	var squareY = Math.round(enemy.y / 32) * 32;
-	var topTile = map.getTileWorldXY(squareX, squareY - 32, 32, 32, blockedLayer);
+	var topTile = map.getTileWorldXY(squareX, squareY - 32, 32, 32, layer);
 	//debug
-	enemyLog("topTile");
-	marker.x = map.getTileWorldXY(enemy.x + 31, enemy.y -32).worldX;
-	marker.y =  map.getTileWorldXY(enemy.x + 32, enemy.y-32).worldY;
-	
+    if(enemyLogging){
+	   enemyLog("topTile");
+	   marker.x = map.getTileWorldXY(enemy.x + 31, enemy.y -32).worldX;
+	   marker.y =  map.getTileWorldXY(enemy.x + 32, enemy.y-32).worldY;
+    }
+
 	//collide false means a sprite can pass through
 	if(!topTile || topTile.collideDown == false){
 		return true;
@@ -343,14 +384,14 @@ function enemyMoveRight(enemy){
 }
 
 //logic funtion which moves the enemy out of a blocked situation
-function unblockEnemy(enemy, character, map, blockedLayer, marker){
+function unblockEnemy(enemy, character, map, layer, marker){
 	enemyLog("unblocking enemy");
 	//is something to the left? Doesn't have to be square
-	var left = isLeftOpen(enemy, map, blockedLayer, marker);
-	var leftTop = isLeftTopOpen(enemy, map, blockedLayer, marker);
-	var right = isRightOpen(enemy, map, blockedLayer, marker);
-	var rightTop = isRightTopOpen(enemy, map, blockedLayer, marker);
-	var top = isTopOpen(enemy, map, blockedLayer, marker);
+	var left = isLeftOpen(enemy, map, layer, marker);
+	var leftTop = isLeftTopOpen(enemy, map, layer, marker);
+	var right = isRightOpen(enemy, map, layer, marker);
+	var rightTop = isRightTopOpen(enemy, map, layer, marker);
+	var top = isTopOpen(enemy, map, layer, marker);
 	
 	if(left && leftTop && right && rightTop){
 		//every path is open but what's right infront of me. So check where the player is
