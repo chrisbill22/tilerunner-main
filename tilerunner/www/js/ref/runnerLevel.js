@@ -14,7 +14,7 @@ var layer;
 var items;
 
 //the frames of the pits used for pit detection in hud
-var pitIds = Array(423,424,425);
+var pitIds = Array();
 
 function runnerLevel_create() {
     var canvas = $("canvas");
@@ -34,13 +34,14 @@ function runnerLevel_create() {
     } else {
         map.addTilesetImage('batch-necessary', 'groundTile');
         map.addTilesetImage('protoblocks', 'protoblocks');
+        map.addTilesetImage('level1', 'protoblocks');
     }
 
     //Calculates the tile offset for the tilesets so that we can grab the correct frame
     for (var i = 0; i != map.tilesets.length; i++) {
         if (map.tilesets[i].name.indexOf("batch-necessary") != -1) {
             groundTileOffset = map.tilesets[i].firstgid;
-        } else if (map.tilesets[i].name.indexOf("protoblocks") != -1) {
+        } else if (map.tilesets[i].name.indexOf("protoblocks") != -1 || map.tilesets[i].name.indexOf("level1") != -1) {
             tilesetOffset = map.tilesets[i].firstgid;
         }
     }
@@ -50,7 +51,7 @@ function runnerLevel_create() {
     layer = map.createLayer('foreground');
     
     //set the blocked areas
-    map.setCollisionBetween(frame(330), frame(500));
+    map.setCollisionBetween(frame(300), frame(700));
 
     layer.resizeWorld();
 

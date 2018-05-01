@@ -16,7 +16,7 @@ function hud_create(game, map, character){
     var blockRecharging = false;
     
     //big button input
-    leftButton = game.add.button(0, 0, 'protoblocks', function(){}, this, 2, 2, 2);
+    leftButton = game.add.button(0, 0, 'protoblocks', function(){}, this, 0, 0, 0);
     leftButton.onInputDown.add(function(){
         leftButtonDown = true;
     });
@@ -30,7 +30,7 @@ function hud_create(game, map, character){
 
     leftButtonDown = false;
 
-    rightButton = game.add.button(canvas.width()/2, 0, 'protoblocks', function(){}, this, 2, 2, 2);
+    rightButton = game.add.button(canvas.width()/2, 0, 'protoblocks', function(){}, this, 0, 0, 0);
 
     rightButton.onInputDown.add(function(){
         rightButtonDown = true;

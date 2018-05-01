@@ -89,7 +89,7 @@ function player_update(){
             //find the top tile
             var topTile = map.getTileAbove(0, Math.round(character.x / map.tileWidth), Math.round(character.y / map.tileHeight));
             //If top tile is a ground tile and not a blocked tile
-            if (topTile.index == tilesetOffset) {
+            if (topTile.index < tilesetOffset+180) {
                 character.body.velocity.x = 0;
                 character.body.x = Math.round(character.body.x / map.tileWidth) * map.tileWidth;
                 currentLane.x = character.body.x;

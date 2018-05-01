@@ -65,7 +65,7 @@ var preloadSets = [{
 	}],
 	spritesheets: [{
 		name:"protoblocks",
-		url:"assets/protoblocks.png"
+		url:"assets/level1.png"
 	},{
 		name:"groundTile",
 		url:"assets/batch-necessary.png"
