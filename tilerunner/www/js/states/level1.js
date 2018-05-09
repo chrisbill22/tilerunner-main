@@ -172,6 +172,110 @@ var level1 = {
         });
 		
 		
+        //USED TO SHOW GRAS CHANGING
+        if(((character.body.x / 32) % 1 < 0.3) || (character.body.velocity.x > 0 && (character.body.x / 32) % 1 > 0.7)){
+            //console.log((character.body.y / 32) % 1);
+            if(((character.body.y / 32) % 1 < 0.3) || (character.body.velocity.y > 0 && (character.body.y / 32) % 1 > 0.7)){
+                
+                var tempx = Math.round(character.body.x / map.tileWidth);
+                var tempy = Math.round(character.body.y / map.tileWidth);
+                var tempTile = map.getTile(tempx, tempy); 
+                
+                if(tempTile && tempTile.index == frame(3, 2)){
+                    //top left
+                    map.removeTile(tempx, tempy);
+                    map.putTile(frame(6, 2), tempx, tempy);
+                    
+                }else if(tempTile && tempTile.index == frame(4, 2)){
+                    //top center
+                    map.removeTile(tempx, tempy);
+                    map.putTile(frame(93, 2), tempx, tempy);
+                    //check the tile below
+                    //var tempTileBelow = map.getTile(tempx, tempy+1);
+                    
+                }else if(tempTile && tempTile.index == frame(5, 2)){
+                    //top right
+                    map.removeTile(tempx, tempy);
+                    map.putTile(frame(7, 2), tempx, tempy);
+                    
+                }else if(tempTile && tempTile.index == frame(33, 2)){
+                    //middle left
+                    map.removeTile(tempx, tempy);
+                    map.putTile(frame(36, 2), tempx, tempy);
+                    
+                }else if(tempTile && tempTile.index == frame(34, 2)){
+                    //middle center
+                    map.removeTile(tempx, tempy);
+                    
+                    //check the tile below and to the left
+                    var tempTileBelowLeft = map.getTile(tempx-1, tempy+1);
+                    //check the tile below and to the right
+                    var tempTileBelowRight = map.getTile(tempx+1, tempy+1);
+                    
+                    //check the tile twice below and to the left
+                    var tempTileTwiceBelowLeft = map.getTile(tempx-1, tempy+2);
+                    //check the tile twice below and to the right
+                    var tempTileTwiceBelowRight = map.getTile(tempx+1, tempy+2);
+                    
+                    if((tempTileBelowLeft && tempTileBelowLeft.index == frame(123, 2)) || (tempTileTwiceBelowLeft && tempTileTwiceBelowLeft.index == frame(123, 2))){
+                        //update the main tile
+                        map.putTile(frame(156, 2), tempx, tempy);
+                        //update the bottom left
+                        map.removeTile(tempx-1, tempy+1);
+                        map.putTile(frame(125, 2), tempx-1, tempy+1);
+                        //update the left one
+                        map.removeTile(tempx-1, tempy);
+                        map.putTile(frame(95, 2), tempx-1, tempy);
+                        //update the bottom right one
+                        map.removeTile(tempx, tempy+1);
+                        map.putTile(frame(126, 2), tempx, tempy+1);
+                        
+                    }else if((tempTileBelowRight && tempTileBelowRight.index == frame(123, 2)) || (tempTileTwiceBelowRight && tempTileTwiceBelowRight.index == frame(123, 2))){
+                        //update the main tile
+                        map.putTile(frame(159, 2), tempx, tempy);
+                        //update the bottom right
+                        map.removeTile(tempx+1, tempy+1);
+                        map.putTile(frame(130, 2), tempx+1, tempy+1);
+                        //update the right one
+                        map.removeTile(tempx+1, tempy);
+                        map.putTile(frame(100, 2), tempx+1, tempy);
+                        //update the bottom one
+                        map.removeTile(tempx, tempy+1);
+                        map.putTile(frame(129, 2), tempx, tempy+1);
+                    }else{
+                        //didn't turn so just use the default
+                        map.putTile(frame(123, 2), tempx, tempy);
+                    }
+                    
+                }else if(tempTile && tempTile.index == frame(35, 2)){
+                    //middle right
+                    map.removeTile(tempx, tempy);
+                    map.putTile(frame(37, 2), tempx, tempy);
+                    
+                }else if(tempTile && tempTile.index == frame(63, 2)){
+                    //bottom left
+                    map.removeTile(tempx, tempy);
+                    map.putTile(frame(66, 2), tempx, tempy);
+                    
+                }else if(tempTile && tempTile.index == frame(64, 2)){
+                    //bottom center
+                    map.removeTile(tempx, tempy);
+                    map.putTile(frame(153, 2), tempx, tempy);
+                    
+                }else if(tempTile && tempTile.index == frame(65, 2)){
+                    //bottom center
+                    map.removeTile(tempx, tempy);
+                    map.putTile(frame(67, 2), tempx, tempy);
+                }
+            }
+        }
+        
+        //map.getTileAbove(0, Math.round(character.x / map.tileWidth), Math.round(character.y / map.tileHeight));
+        
+        if(character.y+32 < enemies.children[0].y){
+            character.body.velocity.y = -100;
+            console.log("HIT");
+        }
         
 	},
 	

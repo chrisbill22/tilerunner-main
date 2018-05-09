@@ -105,9 +105,9 @@ function runnerLevel_update() {
 }
 
 
-function frame(frameNumber, groundTile = false) {
-    if (groundTile) {
-        return frameNumber + groundTileOffset
+function frame(frameNumber, tilesetIndex = null) {
+    if (tilesetIndex != null) {
+        return frameNumber + map.tilesets[tilesetIndex].firstgid;
     }
     return frameNumber + tilesetOffset
 }
