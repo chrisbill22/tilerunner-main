@@ -49,6 +49,7 @@ function runnerLevel_create() {
     //add all the standard layers we have in our Tiled file.
     //These must match Tiled layers
     layer = map.createLayer('foreground');
+    topLayer = map.createLayer('top');
     
     //set the blocked areas
     map.setCollisionBetween(frame(300), frame(700));
@@ -84,9 +85,6 @@ function runnerLevel_create() {
     });
 
 
-    //sets up the HUD
-    hud_create(game, map, character);
-
     //used to track FPS rate
     game.time.advancedTiming = true;
 
@@ -100,7 +98,12 @@ function runnerLevel_create() {
 
 
 function runnerLevel_update() {
-
+     /*game.physics.arcade.overlap(character, items, function(character, item){
+         console.log(item.name);
+         if(item.type == "EnemyDirection"){
+             console.log(item.name)
+         }
+     });*/
     
 }
 
@@ -140,8 +143,10 @@ function checkStandardItems(item){
     if (item.name == "gold") {
         gold += 1;
         goldText.text = gold;
+        item.kill();
     } else if (item.name == "potion") {
         character.heal(25);
         updateHealthImage();
+        item.kill();
     }
 }

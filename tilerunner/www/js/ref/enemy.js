@@ -44,7 +44,11 @@ function enemy_create() {
 			if(customProps.wakeupBottom){
 				enemy.data.wakeupBottom = true;
 			}
-			
+			if(customProps.leader){
+                enemy.data.isLeader = true;
+            }
+            
+            
 			enemy.data.speed*= -1;
 			
 			var healthBarBG = game.add.graphics(0, 0);
@@ -114,7 +118,7 @@ function enemy_update(marker) {
 	if(startEnemies){
 		//Loop through each enemy that is alive
 		enemies.forEachAlive(function (enemy) {
-
+            
 			//if an attack has happened on the enemy. This overrides all other things
 			if(enemy.data.loopPaused == false){
 				//If the main character is ahead of the enemy the correct amount, activate the enemy's tacking
@@ -131,7 +135,7 @@ function enemy_update(marker) {
 						enemy.body.velocity.y = enemy.data.speed;
 					}
 				}
-
+                
 				//if tracking is enabled
 				if (enemy.data.aiActivated == true) {
 
@@ -245,7 +249,7 @@ function enemy_update(marker) {
 
 
 					//the basic level of enemy tracking
-					if (enemy.data.activeMove == false) {
+					if (enemy.data.activeMove == false && enemy.data.isLeader == false) {
 						if (deltaEnemyCharacter > 0 && deltaEnemyCharacter != 1) {
 							//move right
 							enemyLog("move right");
@@ -261,9 +265,9 @@ function enemy_update(marker) {
 								enemy.body.x = Math.round(enemy.body.x / 32) * 32;
 							}
 						}
-
-
-					} 
+					} else if(enemy.data.isLeader == true){
+                        
+                    }
 
 					//log the current velocity so we can check if it changes next time
 					enemy.data.lastVelocity.y = enemy.body.velocity.y;
@@ -279,6 +283,15 @@ function enemy_update(marker) {
 	//Don't allow 2 enemies on the same tile
 	//collision physics
 	game.physics.arcade.collide(enemies, enemies);
+    
+    game.physics.arcade.overlap(enemies.children[0], items, function(enemy, item){
+        if(item.name == "EnemyDirection"){
+            if(item.direction == "right"){
+                enemyMoveRight(enemy);
+                console.log("moving right");
+            }
+        }
+    });
 }
 
 
