@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Tile Runner</title>
+
+	<!-- JQUERY -->
+	<script src="js/external/jquery.min.js"></script>
+
+	<!-- Socket -->
+	<script src="/socket.io/socket.io.js"></script>
+
+	<!-- Pharser -->
+	<script type="text/javascript" src="js/external/phaser.js"></script>
+	<script type="text/javascript" src="js/external/phaser-state-transition.js"></script>
+	<script type="text/javascript" src="js/external/phaser-camera-offset.js"></script>
+	<script type="text/javascript" src="js/external/SaveCPU.js"></script>
+	<!-- Cordova -->
+	<style type="text/css">body{margin:0px;}</style>
+</head>
+
+<body>
+
+
+
+
+
+
+	<!-- SOCKET SCRIPTS -->
+	<script type="text/javascript">
+		var socket = io();
+	</script>
+	
+	<!-- STANDARD GAME JS FILES -->
+	<script type="text/javascript" src="js/boot.js"></script>
+	<script type="text/javascript" src="js/load.js"></script>
+	
+	<!-- STANDARD GAME REF FILES -->
+	<script type="text/javascript" src="js/ref/preloadSet.js"></script>
+	
+    <!-- REFERENCE FILES -->
+	<script type="text/javascript" src="js/ref/basicLevel.js"></script>
+	
+    <script type="text/javascript" src="js/ref/hud.js"></script>
+    
+    <!-- STATE FILES -->
+	<script type="text/javascript" src="js/states/exampleState.js"></script>
+	
+	<!-- GAME STARTUP -->
+	<script type="text/javascript">
+		var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.CANVAS, '');
+		
+		game.state.add('boot', bootState, true);
+		game.state.add('load', loadState);
+        //levels
+        game.state.add('exampleState', exampleState);
+		
+        //game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+        
+		window.addEventListener("resize", function () {
+			game.scale.setGameSize(window.innerWidth, window.innerHeight);
+		});
+		
+		StatusBar.hide();
+	</script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+<!-- -->

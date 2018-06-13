@@ -1,0 +1,10 @@
+{
+    "name": "the-trail-tile-experiment",
+    "version": "0.0.1",
+    "description": "The Trail - Tile Experiment",
+    "dependencies": {
+        "express": "^4.16.2",
+        "mongodb": "^2.2.33",
+        "socket.io": "^2.0.0"
+    }
+}
