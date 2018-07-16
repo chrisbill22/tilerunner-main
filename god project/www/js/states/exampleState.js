@@ -13,14 +13,15 @@ var exampleState = {
         
         //creates the level and the player character
 		basicLevel_create();
+		//see basicLevel.js
+		enableGroundTileDebugger();
 		hud_create();
         
         //--------------------
         //LEVEL CREATE
         //--------------------
 		
-		//see basicLevel.js
-		enableGroundTileDebugger();
+		
 		
 		game.camera.flash("0x000000");
 		

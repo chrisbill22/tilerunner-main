@@ -28,19 +28,19 @@ function hud_create(){
 	footerBackground.beginFill(0xDDDDDD, 1);
     footerBackground.drawRect(0, canvas.height()-(buttonSize+buttonPadding*2), canvas.width(), (buttonSize+buttonPadding*2));
 	
-	lightGreenButton = game.add.button(buttonPadding, canvas.height()-(buttonSize+buttonPadding), 'exampleTileset', doButton, this, 1, 1, 1);
+	lightGreenButton = game.add.button(buttonPadding, canvas.height()-(buttonSize+buttonPadding), 'exampleTileset', doButton, this, FOREST-1, FOREST-1, FOREST-1);
 	lightGreenButton.data.tileType = "grass";
 	lightGreenButton.inputEnabled = true;
 	
-	var brownButton = game.add.button(buttonPadding*2+buttonSize*1, canvas.height()-(buttonSize+buttonPadding), 'exampleTileset', doButton, this, 4, 4, 4);
+	var brownButton = game.add.button(buttonPadding*2+buttonSize*1, canvas.height()-(buttonSize+buttonPadding), 'exampleTileset', doButton, this, DIRT-1, DIRT-1, DIRT-1);
 	brownButton.data.tileType = "dirt";
 	brownButton.inputEnabled = true;
 	
-	var lightBlueButton = game.add.button(buttonPadding*3+buttonSize*2, canvas.height()-(buttonSize+buttonPadding), 'exampleTileset', doButton, this, 6, 6, 6);
+	var lightBlueButton = game.add.button(buttonPadding*3+buttonSize*2, canvas.height()-(buttonSize+buttonPadding), 'exampleTileset', doButton, this, WATER-1, WATER-1, WATER-1);
 	lightBlueButton.data.tileType = "water";
 	lightBlueButton.inputEnabled = true;
 	
-	var greyButton = game.add.button(buttonPadding*4+buttonSize*3, canvas.height()-(buttonSize+buttonPadding), 'exampleTileset', doButton, this, 10, 10, 10);
+	var greyButton = game.add.button(buttonPadding*4+buttonSize*3, canvas.height()-(buttonSize+buttonPadding), 'exampleTileset', doButton, this, MOUNTAIN-1, MOUNTAIN-1, MOUNTAIN-1);
 	greyButton.data.tileType = "mountain";
 	greyButton.inputEnabled = true;
 	
@@ -52,9 +52,10 @@ function hud_create(){
 		console.log("doing");
 		selectBorder.x = sprite.x;
 		selectBorder.y = sprite.y;
-		console.log(sprite.data.tileType);
-		console.log(sprite);
-		selectedTile = sprite._onDownFrame;
+		//console.log(sprite.data.tileType);
+		//console.log(sprite);
+		selectedTile = sprite._onDownFrame+1;
+		console.log("selectedTile = "+selectedTile);
 		switch (sprite.data.tileType){
 			case "grass":
 				break;
